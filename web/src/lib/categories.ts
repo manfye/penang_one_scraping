@@ -41,7 +41,7 @@ export const CATEGORIES: Record<CategoryId, CategoryMeta> = {
     id: "aed",
     label: "AED",
     unitLabel: "AED unit",
-    emoji: "🫀",
+    emoji: "❤️",
     file: "/data/aed.json",
     classes: {
       chipActive: "bg-rose-500 text-white shadow-lg shadow-rose-500/30",

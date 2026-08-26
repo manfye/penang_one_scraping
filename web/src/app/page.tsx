@@ -19,7 +19,7 @@ const VIEWS = ["list", "map"] as const;
 type View = (typeof VIEWS)[number];
 
 export default function Home() {
-  const [category, setCategory] = useState<CategoryId>("ev_charger");
+  const [category, setCategory] = useState<CategoryId>("aed");
   const [view, setView] = useState<View>("list");
   const [target, setTarget] = useState<LocationItemWithDistance | null>(null);
 

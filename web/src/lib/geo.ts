@@ -46,3 +46,25 @@ export function compassLabel(bearing: number): string {
   const index = Math.round(bearing / 22.5) % 16;
   return COMPASS_POINTS[index];
 }
+
+/** Bearing to target relative to the direction the phone is facing, in (-180, 180]. Positive = target is to the right. */
+export function relativeBearing(targetBearing: number, heading: number): number {
+  const diff = ((targetBearing - heading + 180) % 360 + 360) % 360 - 180;
+  return diff;
+}
+
+export type DirectionHint = "ahead" | "behind" | "left" | "right";
+
+export function directionHint(relative: number): DirectionHint {
+  const abs = Math.abs(relative);
+  if (abs <= 20) return "ahead";
+  if (abs >= 160) return "behind";
+  return relative < 0 ? "left" : "right";
+}
+
+export const DIRECTION_LABEL: Record<DirectionHint, string> = {
+  ahead: "Straight ahead",
+  behind: "Behind you",
+  left: "Turn left",
+  right: "Turn right",
+};

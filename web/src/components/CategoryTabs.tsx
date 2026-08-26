@@ -25,7 +25,11 @@ export function CategoryTabs({
               isActive ? meta.classes.chipActive : meta.classes.chipIdle
             }`}
           >
-            <span className="text-base leading-none">{meta.emoji}</span>
+            <span
+              className={`text-base leading-none ${id === "aed" ? "inline-block animate-heartbeat" : ""}`}
+            >
+              {meta.emoji}
+            </span>
             {meta.label}
             {counts[id] != null && (
               <span

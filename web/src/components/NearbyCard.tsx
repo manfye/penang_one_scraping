@@ -2,8 +2,21 @@
 
 import type { LocationItemWithDistance } from "@/lib/types";
 import { CATEGORIES } from "@/lib/categories";
-import { compassLabel, formatDistance } from "@/lib/geo";
+import {
+  compassLabel,
+  directionHint,
+  formatDistance,
+  relativeBearing,
+  type DirectionHint,
+} from "@/lib/geo";
 import { CompassArrow } from "./CompassArrow";
+
+const HINT_LABEL: Record<DirectionHint, string> = {
+  left: "◀ Left",
+  right: "Right ▶",
+  ahead: "Ahead",
+  behind: "Behind",
+};
 
 export function NearbyCard({
   item,
@@ -15,18 +28,30 @@ export function NearbyCard({
   onNavigate: () => void;
 }) {
   const meta = CATEGORIES[item.category];
+  const isAed = item.category === "aed";
+
+  const hint =
+    heading != null ? directionHint(relativeBearing(item.bearingDeg, heading)) : null;
+
   return (
     <div className="flex items-center gap-3 rounded-2xl bg-white p-3.5 shadow-sm ring-1 ring-zinc-100">
-      <div className="flex flex-col items-center gap-1">
-        <CompassArrow bearing={item.bearingDeg} heading={heading} className="h-11 w-11" />
-        <span className="text-[10px] font-bold uppercase text-zinc-400">
-          {compassLabel(item.bearingDeg)}
+      <div className="flex w-12 flex-col items-center gap-1">
+        <CompassArrow
+          bearing={item.bearingDeg}
+          heading={heading}
+          pulse={isAed}
+          className="h-11 w-11"
+        />
+        <span className="text-center text-[10px] font-bold uppercase leading-tight text-zinc-400">
+          {hint ? HINT_LABEL[hint] : compassLabel(item.bearingDeg)}
         </span>
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className="text-sm">{meta.emoji}</span>
+          <span className={`text-sm ${isAed ? "inline-block animate-heartbeat" : ""}`}>
+            {meta.emoji}
+          </span>
           <h3 className="truncate text-sm font-bold text-zinc-900">{item.name}</h3>
         </div>
         {item.address && (
