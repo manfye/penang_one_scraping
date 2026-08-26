@@ -98,11 +98,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="h-full">
-            <MapView
-              items={nearest.length ? nearest : (sorted ?? [])}
-              origin={geo.position}
-              onSelect={setTarget}
-            />
+            <MapView items={sorted ?? []} origin={geo.position} onSelect={setTarget} />
           </div>
         )}
       </main>
