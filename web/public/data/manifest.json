@@ -1,0 +1,14 @@
+{
+  "ev_charger": {
+    "sites": 225,
+    "units": 494
+  },
+  "aed": {
+    "sites": 427,
+    "units": 439
+  },
+  "cctv": {
+    "sites": 678,
+    "units": 1977
+  }
+}
