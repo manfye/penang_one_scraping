@@ -3,6 +3,8 @@ import type { CategoryId } from "./types";
 export interface CategoryMeta {
   id: CategoryId;
   label: string;
+  /** Lowercase-safe plural, e.g. "AEDs" / "EV chargers" — never derive this via .toLowerCase() on `label`, it mangles acronyms. */
+  pluralLabel: string;
   unitLabel: string;
   emoji: string;
   file: string;
@@ -28,6 +30,7 @@ export const CATEGORIES: Record<CategoryId, CategoryMeta> = {
   ev_charger: {
     id: "ev_charger",
     label: "EV Charger",
+    pluralLabel: "EV chargers",
     unitLabel: "charge point",
     emoji: "⚡",
     file: "/data/ev_charger.json",
@@ -46,6 +49,7 @@ export const CATEGORIES: Record<CategoryId, CategoryMeta> = {
   aed: {
     id: "aed",
     label: "AED",
+    pluralLabel: "AEDs",
     unitLabel: "AED unit",
     emoji: "❤️",
     file: "/data/aed.json",
@@ -64,6 +68,7 @@ export const CATEGORIES: Record<CategoryId, CategoryMeta> = {
   cctv: {
     id: "cctv",
     label: "CCTV",
+    pluralLabel: "CCTV cameras",
     unitLabel: "camera",
     emoji: "📷",
     file: "/data/cctv.json",

@@ -43,7 +43,7 @@ export function LocationGate({
             ? "Enable location for this site in your browser settings, then try again."
             : isLoading
               ? "Getting a lock on your GPS — one sec."
-              : `Turn on location to see the nearest ${meta.label.toLowerCase()}s and get pointed straight there.`}
+              : `Turn on location to see the nearest ${meta.pluralLabel} and get pointed straight there.`}
         </p>
       </div>
 

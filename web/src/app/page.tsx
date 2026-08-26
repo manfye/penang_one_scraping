@@ -80,7 +80,7 @@ export default function Home() {
         ) : view === "list" ? (
           <div className="h-full overflow-y-auto px-4 pb-6">
             {loading && (
-              <p className="py-8 text-center text-sm text-zinc-400">Loading {meta.label}s…</p>
+              <p className="py-8 text-center text-sm text-zinc-400">Loading {meta.pluralLabel}…</p>
             )}
             {!loading && nearest.length === 0 && (
               <p className="py-8 text-center text-sm text-zinc-400">Nothing found nearby.</p>
