@@ -15,11 +15,11 @@ export function CompassArrow({
   return (
     <div className="relative grid place-items-center">
       {pulse && (
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-60" />
+        <span className="absolute inline-flex h-full w-full animate-locate-pulse rounded-full bg-rose-400" />
       )}
       <div
         className={`relative grid place-items-center rounded-full bg-zinc-900 text-white transition-transform duration-300 ease-out ${className ?? "h-10 w-10"} ${
-          pulse ? "ring-2 ring-rose-300" : ""
+          pulse ? "ring-2 ring-rose-200" : ""
         }`}
         style={{ transform: `rotate(${rotation}deg)` }}
       >

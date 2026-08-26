@@ -1,16 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { LocationItemWithDistance } from "@/lib/types";
 import { CATEGORIES } from "@/lib/categories";
-
-const ACCENT_HEX: Record<string, string> = {
-  ev_charger: "#10b981",
-  aed: "#f43f5e",
-  cctv: "#8b5cf6",
-};
 
 function markerIcon(color: string) {
   return L.divIcon({
@@ -21,9 +15,16 @@ function markerIcon(color: string) {
   });
 }
 
+// Two layers: a calm expanding "locate" ring (plain CSS animation, driven by
+// the .animate-locate-pulse class in globals.css) behind a solid dot.
 const userIcon = L.divIcon({
   className: "",
-  html: `<div style="width:16px;height:16px;border-radius:9999px;background:#2563eb;border:3px solid white;box-shadow:0 0 0 4px rgba(37,99,235,.25)"></div>`,
+  html: `
+    <div style="position:relative;width:16px;height:16px;">
+      <span class="animate-locate-pulse" style="position:absolute;inset:-10px;border-radius:9999px;background:#2563eb;"></span>
+      <div style="position:relative;width:16px;height:16px;border-radius:9999px;background:#2563eb;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,.35)"></div>
+    </div>
+  `,
   iconSize: [16, 16],
   iconAnchor: [8, 8],
 });
@@ -40,16 +41,15 @@ export function MapView({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
+  const hasCenteredRef = useRef(false);
+  const [justRecentered, setJustRecentered] = useState(false);
 
-  const center = useMemo<[number, number]>(
-    () => (origin ? [origin.lat, origin.lng] : [5.4141, 100.3288]),
-    [origin],
-  );
+  const fallbackCenter = useMemo<[number, number]>(() => [5.4141, 100.3288], []);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     const map = L.map(containerRef.current, {
-      center,
+      center: origin ? [origin.lat, origin.lng] : fallbackCenter,
       zoom: 15,
       zoomControl: false,
     });
@@ -67,9 +67,14 @@ export function MapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Snap to the user's location once it's first acquired, but don't fight
+  // the user's panning on every subsequent GPS update — that's what the
+  // recenter button below is for.
   useEffect(() => {
-    mapRef.current?.setView(center);
-  }, [center]);
+    if (!origin || hasCenteredRef.current || !mapRef.current) return;
+    mapRef.current.setView([origin.lat, origin.lng], 16);
+    hasCenteredRef.current = true;
+  }, [origin]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -78,11 +83,11 @@ export function MapView({
     layer.clearLayers();
 
     if (origin) {
-      L.marker([origin.lat, origin.lng], { icon: userIcon }).addTo(layer);
+      L.marker([origin.lat, origin.lng], { icon: userIcon, zIndexOffset: 1000 }).addTo(layer);
     }
 
     for (const item of items) {
-      const color = ACCENT_HEX[item.category] ?? "#3f3f46";
+      const color = CATEGORIES[item.category]?.accentHex ?? "#3f3f46";
       const marker = L.marker([item.lat, item.lng], { icon: markerIcon(color) });
       marker.on("click", () => onSelect(item));
       marker.bindTooltip(`${CATEGORIES[item.category].emoji} ${item.name}`, {
@@ -93,5 +98,35 @@ export function MapView({
     }
   }, [items, origin, onSelect]);
 
-  return <div ref={containerRef} className="h-full w-full" />;
+  const recenter = () => {
+    if (!origin || !mapRef.current) return;
+    mapRef.current.flyTo([origin.lat, origin.lng], Math.max(mapRef.current.getZoom(), 16), {
+      duration: 0.6,
+    });
+    setJustRecentered(true);
+    setTimeout(() => setJustRecentered(false), 700);
+  };
+
+  return (
+    <div className="relative h-full w-full">
+      <div ref={containerRef} className="h-full w-full" />
+      <button
+        onClick={recenter}
+        disabled={!origin}
+        aria-label="Recenter on my location"
+        className={`absolute bottom-24 right-3 z-[1000] grid h-11 w-11 place-items-center rounded-full bg-white text-blue-600 shadow-lg ring-1 ring-black/5 transition-transform active:scale-90 disabled:opacity-40 ${
+          justRecentered ? "scale-110" : ""
+        }`}
+      >
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+          <path
+            strokeLinecap="round"
+            d="M12 2v3M12 19v3M22 12h-3M5 12H2"
+          />
+          <circle cx="12" cy="12" r="7" />
+        </svg>
+      </button>
+    </div>
+  );
 }

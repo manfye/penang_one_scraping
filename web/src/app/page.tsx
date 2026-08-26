@@ -5,6 +5,8 @@ import { useMemo, useState } from "react";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { NearbyCard } from "@/components/NearbyCard";
 import { NavSheet } from "@/components/NavSheet";
+import { LocateView } from "@/components/LocateView";
+import { LocationGate } from "@/components/LocationGate";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useHeading } from "@/hooks/useHeading";
 import { useNearby } from "@/hooks/useNearby";
@@ -22,6 +24,7 @@ export default function Home() {
   const [category, setCategory] = useState<CategoryId>("aed");
   const [view, setView] = useState<View>("list");
   const [target, setTarget] = useState<LocationItemWithDistance | null>(null);
+  const [locating, setLocating] = useState<LocationItemWithDistance | null>(null);
 
   const geo = useGeolocation();
   const { heading, needsPermission, enable } = useHeading();
@@ -62,31 +65,6 @@ export default function Home() {
         <CategoryTabs active={category} onChange={setCategory} counts={{}} />
       </div>
 
-      {geo.status !== "ready" && (
-        <div className="mx-4 mt-3 rounded-2xl bg-zinc-900 p-4 text-white">
-          <p className="text-sm font-semibold">
-            {geo.status === "denied"
-              ? "Location access denied"
-              : geo.status === "loading"
-                ? "Finding you..."
-                : "Turn on location to see what's nearest"}
-          </p>
-          <p className="mt-0.5 text-xs text-zinc-400">
-            {geo.status === "denied"
-              ? "Enable location in your browser settings to sort by distance."
-              : "We only use it on your device to sort results — nothing is sent anywhere."}
-          </p>
-          {geo.status !== "loading" && geo.status !== "denied" && (
-            <button
-              onClick={geo.request}
-              className="mt-3 rounded-full bg-white px-4 py-2 text-xs font-bold text-zinc-900 active:scale-95"
-            >
-              Enable location
-            </button>
-          )}
-        </div>
-      )}
-
       {geo.status === "ready" && needsPermission && (
         <button
           onClick={enable}
@@ -97,18 +75,15 @@ export default function Home() {
       )}
 
       <main className="mt-3 flex-1 overflow-hidden">
-        {view === "list" ? (
+        {geo.status !== "ready" ? (
+          <LocationGate status={geo.status} meta={meta} onRequest={geo.request} />
+        ) : view === "list" ? (
           <div className="h-full overflow-y-auto px-4 pb-6">
             {loading && (
               <p className="py-8 text-center text-sm text-zinc-400">Loading {meta.label}s…</p>
             )}
-            {!loading && geo.status === "ready" && nearest.length === 0 && (
+            {!loading && nearest.length === 0 && (
               <p className="py-8 text-center text-sm text-zinc-400">Nothing found nearby.</p>
-            )}
-            {!loading && geo.status !== "ready" && (
-              <p className="py-8 text-center text-sm text-zinc-400">
-                Enable location to sort {meta.label.toLowerCase()}s by distance.
-              </p>
             )}
             <div className="flex flex-col gap-2">
               {nearest.map((item) => (
@@ -138,7 +113,24 @@ export default function Home() {
           destLng={target.lng}
           destName={target.name}
           origin={geo.position}
+          onWalk={() => {
+            setLocating(target);
+            setTarget(null);
+          }}
           onClose={() => setTarget(null)}
+        />
+      )}
+
+      {locating && (
+        <LocateView
+          item={locating}
+          origin={geo.position}
+          heading={heading}
+          onClose={() => setLocating(null)}
+          onOpenExternal={() => {
+            setTarget(locating);
+            setLocating(null);
+          }}
         />
       )}
     </div>
