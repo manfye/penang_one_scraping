@@ -34,8 +34,12 @@ export function NearbyCard({
     heading != null ? directionHint(relativeBearing(item.bearingDeg, heading)) : null;
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-white p-3.5 shadow-sm ring-1 ring-zinc-100">
-      <div className="flex w-12 flex-col items-center gap-1">
+    <button
+      type="button"
+      onClick={onNavigate}
+      className="flex w-full items-center gap-3 rounded-2xl bg-white p-3.5 text-left shadow-sm ring-1 ring-zinc-100 transition-colors active:bg-zinc-50"
+    >
+      <div className="flex w-12 shrink-0 flex-col items-center gap-1">
         <CompassArrow
           bearing={item.bearingDeg}
           heading={heading}
@@ -69,12 +73,11 @@ export function NearbyCard({
         </div>
       </div>
 
-      <button
-        onClick={onNavigate}
-        className={`shrink-0 rounded-full px-4 py-2.5 text-xs font-bold text-white transition-transform active:scale-95 ${meta.classes.button}`}
+      <span
+        className={`shrink-0 rounded-full px-4 py-2.5 text-xs font-bold text-white ${meta.classes.button}`}
       >
         Go
-      </button>
-    </div>
+      </span>
+    </button>
   );
 }
